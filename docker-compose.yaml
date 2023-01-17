@@ -1,0 +1,53 @@
+version: '3.7'
+
+services:
+
+  openldap1:
+    build: ./src/master
+    hostname: ldap1
+    secrets:
+      - ldap-admin-password
+    environment:
+      - LDAP_TLS=false
+      - LDAP_ORGANISATION=EXAMPLE
+      - LDAP_DOMAIN=example.org
+      - LDAP_READONLY_USER=true
+      - LDAP_ADMIN_PASSWORD_FILE=/run/secrets/ldap-admin-password
+      - LDAP_REPLICATION=true
+    volumes:
+      - '<TODO>/ldap1-data:/var/lib/ldap'
+      - '<TODO>/ldap1-config:/etc/ldap/slapd.d'
+
+  openldap2:
+    build: ./src/slave
+    hostname: ldap2
+    depends_on:
+      - openldap1
+    secrets:
+      - ldap-admin-password
+    environment:
+      - LDAP_TLS=false
+      - LDAP_ORGANISATION=EXAMPLE
+      - LDAP_DOMAIN=example.org
+      - LDAP_READONLY_USER=true
+      - LDAP_ADMIN_PASSWORD_FILE=/run/secrets/ldap-admin-password
+      - LDAP_REPLICATION=true
+      - LDAP_RID=001
+      - LDAP_REPLICATION_MASTER="ldap://openldap1"
+    volumes:
+      - '<TODO>/ldap2-data:/var/lib/ldap'
+      - '<TODO>/ldap2-config:/etc/ldap/slapd.d'
+
+  phpldapadmin:
+    image: osixia/phpldapadmin:latest
+    depends_on:
+      - openldap1
+    ports:
+      - '8443:443'
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=openldap1
+
+secrets:
+  ldap-admin-password:
+    file: "./ldap_admin_password.txt"
+
