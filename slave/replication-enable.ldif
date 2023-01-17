@@ -1,0 +1,15 @@
+# Add sync replication on backend
+dn: olcDatabase={1}{{ LDAP_BACKEND }},cn=config
+changetype: modify
+add: olcSyncRepl
+olcSyncRepl: rid={{ LDAP_RID }}
+  provider={{ LDAP_REPLICATION_MASTER }}
+  bindmethod=simple
+  binddn="cn=admin,$LDAP_BASE_DN"
+  credentials=$LDAP_ADMIN_PASSWORD
+  searchbase="$LDAP_BASE_DN"
+  scope=sub
+  schemachecking=on
+  type=refreshAndPersist
+  retry="10 +"
+  interval=00:00:01:00

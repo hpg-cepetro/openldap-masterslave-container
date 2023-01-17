@@ -1,0 +1,13 @@
+# Load syncprov module
+dn: cn=module{0},cn=config
+changetype: modify
+add: olcModuleLoad
+olcModuleLoad: syncprov
+
+# Add syncprov on backend
+dn: olcOverlay=syncprov,olcDatabase={1}{{ LDAP_BACKEND }},cn=config
+changetype: add
+objectClass: olcOverlayConfig
+objectClass: olcSyncProvConfig
+olcOverlay: syncprov
+olcSpSessionLog: 100
